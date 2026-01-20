@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PRACTICA MI EXAMEN</title>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <style>
+        :root { --blue: #2c3e50; --green: #27ae60; --red: #e74c3c; }
+        body { font-family: sans-serif; background: #f4f7f6; margin: 0; padding: 15px; }
+        .exam-container { max-width: 500px; margin: auto; background: white; padding: 20px; border-radius: 15px; border-top: 10px solid var(--blue); box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
+        .header { text-align: center; border-bottom: 2px solid #eee; margin-bottom: 20px; padding-bottom: 10px; }
+        .question-card { display: none; animation: fadeIn 0.4s; }
+        .active { display: block; }
+        .question-text { font-size: 18px; font-weight: bold; color: var(--blue); margin-bottom: 15px; }
+        .option { display: block; background: #f8f9fa; border: 2px solid #ddd; padding: 15px; margin-bottom: 10px; border-radius: 8px; cursor: pointer; transition: 0.3s; }
+        .option:active { background: #e9ecef; }
+        .input-calc { width: 100%; padding: 15px; border: 2px solid #ddd; border-radius: 8px; font-size: 18px; box-sizing: border-box; margin-bottom: 15px; }
+        .btn-next { width: 100%; padding: 18px; border: none; border-radius: 8px; background: var(--blue); color: white; font-weight: bold; font-size: 16px; margin-top: 10px; }
+        .score-screen { text-align: center; display: none; }
+        .grade { font-size: 60px; font-weight: bold; color: var(--green); margin: 20px 0; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    </style>
+</head>
+<body>
+
+<div class="exam-container">
+    <div class="header">
+        <h1 style="margin:0; font-size: 20px;">PRACTICA MI EXAMEN</h1>
+        <p style="font-size: 12px; color: #666;">Basado en Contabilidad de Nómina</p>
+    </div>
+
+    <div id="quiz">
+        <div class="question-card active" id="q0">
+            <p class="question-text">1. ¿Qué concepto se obtiene restando el "Límite Inferior" a la "Base Gravable"?</p>
+            <div class="option" onclick="check(0, 'Excedente')">Excedente</div>
+            <div class="option" onclick="check(0, 'Impuesto Marginal')">Impuesto Marginal</div>
+            <div class="option" onclick="check(0, 'Cuota Fija')">Cuota Fija</div>
+        </div>
+
+        <div class="question-card" id="q1">
+            <p class="question-text">2. Según tus tablas, ¿cuál es el porcentaje de IMSS que se le retiene al trabajador?</p>
+            <div class="option" onclick="check(1, '2.775%')">2.775%</div>
+            <div class="option" onclick="check(1, '3.5%')">3.5%</div>
+            <div class="option" onclick="check(1, '1.1%')">1.1%</div>
+        </div>
+
+        <div class="question-card" id="q2">
+            <p class="question-text">3. Si un trabajador gana $555 diarios y trabajó 6 días, ¿cuánto le corresponde de 7mo Día?</p>
+            <input type="number" id="ans2" class="input-calc" placeholder="Ingresa el monto">
+            <button class="btn-next" onclick="checkCalc(2, 555)">SIGUIENTE</button>
+        </div>
+
+        <div class="question-card" id="q3">
+            <p class="question-text">4. ¿Cuál es la fórmula para obtener la "Base Gravable"?</p>
+            <div class="option" onclick="check(3, 'a')">Sueldo Diario + IMSS</div>
+            <div class="option" onclick="check(3, 'correct')">Sueldo Base + 7mo Día</div>
+            <div class="option" onclick="check(3, 'b')">Sueldo Base - ISR</div>
+        </div>
+
+        <div class="question-card" id="q4">
+            <p class="question-text">5. Si la Base es $4532.50, ISR es $533.63 e IMSS es $125.78, ¿cuál es el NETO?</p>
+            <input type="number" id="ans4" class="input-calc" placeholder="Ingresa el neto final">
+            <button class="btn-next" onclick="checkCalc(4, 3873.09)">FINALIZAR EXAMEN</button>
+        </div>
+    </div>
+
+    <div id="score-screen" class="score-screen">
+        <h2>CALIFICACIÓN FINAL</h2>
+        <div id="final-grade" class="grade">0</div>
+        <p id="message"></p>
+        <button class="btn-next" onclick="location.reload()">REINTENTAR EXAMEN</button>
+    </div>
+</div>
+
+<script>
+    let currentQ = 0;
+    let score = 0;
+    const totalQuestions = 5;
+
+    function check(qIndex, choice) {
+        // Respuestas correctas
+        const correctas = ["Excedente", "2.775%", "correct"];
+        
+        if (choice === "Excedente" || choice === "2.775%" || choice === "correct") {
+            score += 2; // Cada una vale 2 puntos para llegar a 10
+        }
+        next();
+    }
+
+    function checkCalc(qIndex, correctVal) {
+        const userVal = parseFloat(document.getElementById('ans' + qIndex).value);
+        if (Math.abs(userVal - correctVal) < 1) {
+            score += 2;
+        }
+        next();
+    }
+
+    function next() {
+        document.getElementById('q' + currentQ).classList.remove('active');
+        currentQ++;
+        if (currentQ < totalQuestions) {
+            document.getElementById('q' + currentQ).classList.add('active');
+        } else {
+            showScore();
+        }
+    }
+
+    function showScore() {
+        document.getElementById('quiz').style.display = 'none';
+        const screen = document.getElementById('score-screen');
+        screen.style.display = 'block';
+        document.getElementById('final-grade').innerText = score;
+        
+        if(score >= 10) {
+            confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
+            document.getElementById('message').innerText = "¡FELICIDADES! DOMINAS LA NÓMINA";
+        } else if(score >= 6) {
+            document.getElementById('message').innerText = "APROBADO, PERO SIGUE PRACTICANDO";
+        } else {
+            document.getElementById('message').innerText = "REPRUEBAS. REVISA TUS TABLAS DE ISR E IMSS";
+        }
+    }
+</script>
+</body>
+</html>
